@@ -3,323 +3,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Image Analyzer Pro</title>
+    <title>High-Performance Vision AI</title>
     <style>
         :root {
-            --bg-dark: #0f172a;
-            --card-dark: #1e293b;
-            --accent-color: #38bdf8;
-            --accent-hover: #0ea5e9;
-            --text-light: #f8fafc;
-            --text-muted: #94a3b8;
+            --bg-main: #090d16;
+            --card-bg: #131a26;
+            --accent: #10b981;
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-light);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
             margin: 0;
             padding: 20px;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            box-sizing: border-box;
         }
 
-        .card {
-            background-color: var(--card-dark);
-            padding: 32px;
-            border-radius: 24px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+        .app-container {
+            background-color: var(--card-bg);
+            padding: 28px;
+            border-radius: 20px;
             width: 100%;
-            max-width: 420px;
+            max-width: 400px;
             text-align: center;
-            border: 1px solid #334155;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            border: 1px solid #1e293b;
         }
 
         h2 {
-            margin: 0 0 8px 0;
-            font-size: 26px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            background: linear-gradient(to right, #38bdf8, #818cf8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .subtitle {
-            color: var(--text-muted);
-            font-size: 14px;
-            margin-bottom: 24px;
-        }
-
-        .btn-action {
-            background-color: var(--accent-color);
-            color: #0f172a;
-            border: none;
-            padding: 14px 28px;
-            font-size: 16px;
+            margin: 0 0 6px 0;
+            font-size: 22px;
             font-weight: 600;
-            border-radius: 12px;
+        }
+
+        .status-text {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .btn-toggle {
+            background-color: var(--accent);
+            color: #ffffff;
+            border: none;
+            padding: 12px 24px;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 10px;
             cursor: pointer;
-            transition: all 0.2s;
             width: 100%;
-            box-shadow: 0 4px 14px rgba(56, 189, 248, 0.3);
+            transition: opacity 0.2s;
         }
 
-        .btn-action:hover {
-            background-color: var(--accent-hover);
-            transform: translateY(-1px);
+        .btn-toggle:hover {
+            opacity: 0.9;
         }
 
-        .btn-action:disabled {
-            background-color: #334155;
-            color: var(--text-muted);
+        .btn-toggle:disabled {
+            background-color: #374151;
+            color: #9ca3af;
             cursor: not-allowed;
-            box-shadow: none;
-            transform: none;
         }
 
-        .camera-wrapper {
+        .video-box {
             position: relative;
-            margin: 28px auto;
-            width: 260px;
-            height: 260px;
-            border-radius: 50%; /* เปลี่ยนเป็นทรงกลมสุดล้ำ */
+            width: 240px;
+            height: 240px;
+            margin: 24px auto;
+            border-radius: 14px;
             overflow: hidden;
-            border: 4px solid #334155;
-            background-color: #0f172a;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            transition: border-color 0.2s;
-        }
-
-        /* เอฟเฟกต์ไฟแฟลชตอนจับภาพ */
-        .camera-wrapper.flash {
-            border-color: #ffffff;
-            animation: pulse 0.3s ease-out;
-        }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0px rgba(255,255,255,0); }
-            50% { box-shadow: 0 0 30px rgba(255,255,255,0.8); }
-            100% { box-shadow: 0 0 0px rgba(255,255,255,0); }
+            background: #090d16;
+            border: 2px solid #1e293b;
         }
 
         #webcam-container canvas {
             width: 100% !important;
             height: 100% !important;
             object-fit: cover;
+            transform: scaleX(-1); /* กลับด้านกล้อง Mirror */
         }
 
-        .placeholder-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: var(--text-muted);
-            font-size: 14px;
-            width: 80%;
-        }
-
-        /* ตัวนับเวลาถอยหลัง */
-        .timer-badge {
-            display: inline-block;
+        .countdown-bar {
+            width: 100%;
+            height: 4px;
             background: #1e293b;
-            border: 1px solid #334155;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            color: var(--accent-color);
-            margin-bottom: 16px;
-            font-weight: 500;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .timer-badge.show {
-            opacity: 1;
-        }
-
-        #results-panel {
-            background: #0f172a;
-            border-radius: 16px;
-            padding: 20px;
-            border: 1px solid #334155;
-            text-align: left;
-        }
-
-        .result-item {
-            margin-bottom: 14px;
-        }
-
-        .result-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .result-info {
-            display: flex;
-            justify-content: space-between;
-            font-size: 14px;
-            margin-bottom: 6px;
-        }
-
-        .result-name {
-            font-weight: 500;
-            color: #e2e8f0;
-        }
-
-        .result-val {
-            font-family: monospace;
-            color: var(--accent-color);
-            font-weight: 600;
-        }
-
-        /* หลอดแสดงความมั่นใจ (Confidence Bar) */
-        .progress-bar-bg {
-            background: #1e293b;
-            height: 6px;
-            border-radius: 3px;
+            margin-bottom: 20px;
+            border-radius: 2px;
             overflow: hidden;
         }
 
-        .progress-bar-fill {
-            background: linear-gradient(to right, #38bdf8, #6366f1);
+        .countdown-progress {
             height: 100%;
+            background: var(--accent);
             width: 0%;
-            transition: width 0.4s ease-out;
+        }
+
+        #result-list {
+            background: #090d16;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: left;
+        }
+
+        .output-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #1e293b;
+            font-size: 14px;
+        }
+
+        .output-row:last-child {
+            border-bottom: none;
+        }
+
+        .output-val {
+            font-family: monospace;
+            font-weight: bold;
+            color: var(--accent);
         }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Vision AI Predictor</h2>
-    <div class="subtitle">ระบบวิเคราะห์วัตถุอัตโนมัติ ทุกๆ 3 วินาที</div>
+<div class="app-container">
+    <h2>Ultra-Smooth Vision AI</h2>
+    <div class="status-text">ประมวลผลแบบแยกเธรดเบื้องหลัง ทุกๆ 3 วินาที</div>
     
-    <button type="button" class="btn-action" id="start-btn" onclick="init()">เริ่มระบบทำงาน</button>
+    <button type="button" class="btn-toggle" id="action-btn" onclick="startApp()">เปิดใช้งานระบบลื่นไหลพิเศษ</button>
     
-    <div class="camera-wrapper" id="camera-box">
-        <div id="webcam-container">
-            <div class="placeholder-text">กดปุ่มด้านบนเพื่อเปิดใช้งานกล้อง</div>
-        </div>
+    <div class="video-box">
+        <div id="webcam-container"></div>
     </div>
 
-    <div class="timer-badge" id="timer-display">วิเคราะห์ในอีก: 3.0s</div>
+    <div class="countdown-bar">
+        <div class="countdown-progress" id="progress-line"></div>
+    </div>
     
-    <div id="results-panel">
-        <div style="text-align: center; color: var(--text-muted); font-size: 14px;">ระบบพร้อมทำงาน...</div>
+    <div id="result-list">
+        <div style="text-align: center; color: var(--text-secondary); font-size: 13px;">ระบบสแตนด์บาย...</div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 <script type="text/javascript">
-    // เปลี่ยนลิงก์ Model ของคุณตรงนี้
-    const URL = "https://teachablemachine.withgoogle.com/models/R29oofXTG1/";
+    const MODEL_URL = "https://teachablemachine.withgoogle.com/models/R29oofXTG1/";
+    
+    let model, webcam, maxPredictions;
+    let isPredicting = false;
+    let lastPredictTime = 0;
 
-    let model, webcam, resultsPanel, maxPredictions;
-    let timeRemaining = 3.0;
-    let countdownInterval, predictInterval;
-
-    async function init() {
-        const btn = document.getElementById('start-btn');
+    async function startApp() {
+        const btn = document.getElementById('action-btn');
         btn.disabled = true;
-        btn.innerText = "กำลังเชื่อมต่อโมเดล...";
+        btn.innerText = "กำลังดาวน์โหลดโมเดล...";
 
         try {
-            const modelURL = URL + "model.json";
-            const metadataURL = URL + "metadata.json";
-
-            model = await tmImage.load(modelURL, metadataURL);
+            // โหลดโมเดลแบบ Asynchronous
+            model = await tmImage.load(MODEL_URL + "model.json", MODEL_URL + "metadata.json");
             maxPredictions = model.getTotalClasses();
 
-            // ตั้งค่ากล้องขนาด 260x260 ให้พอดีกับกรอบวงกลม
-            webcam = new tmImage.Webcam(260, 260, true); 
-            await webcam.setup(); 
+            // ตั้งค่ากล้องความละเอียดต่ำลงเล็กน้อย เพื่อความเร็วและการประมวลผลที่ลื่นขึ้นสูงสุด
+            webcam = new tmImage.Webcam(240, 240, false); // ปิดการฟลิบตรงนี้ แล้วไปฟลิบด้วย CSS แทน เพื่อรีด FPS
+            await webcam.setup();
             await webcam.play();
 
-            // เคลียร์ค่าและใส่หน้ากล้องลงไปแทน
-            document.getElementById("webcam-container").innerHTML = "";
             document.getElementById("webcam-container").appendChild(webcam.canvas);
+            initUI();
+
+            btn.innerText = "ระบบกำลังทำงานอย่างลื่นไหล";
+            lastPredictTime = performance.now();
             
-            // เตรียมหน้าต่างแสดงผลลัพธ์
-            resultsPanel = document.getElementById("results-panel");
-            createResultElements();
+            // เริ่มต้น High-Performance Loop
+            window.requestAnimationFrame(renderLoop);
 
-            btn.innerText = "ระบบกำลังทำงาน";
-            document.getElementById("timer-display").classList.add("show");
-
-            // ลูปหลัก: ให้กล้อง Feed ภาพสดตลอดเวลาเพื่อให้ภาพไม่กระตุกนิ่ง
-            window.requestAnimationFrame(cameraLoop);
-
-            // เริ่มการตั้งเวลา Predict และแสดง Countdown ทุกๆ 3 วินาที
-            startAutomation();
-
-        } catch (error) {
-            alert("ไม่สามารถเปิดกล้องหรือโหลดโมเดลได้: " + error);
+        } catch (e) {
+            alert("เกิดข้อผิดพลาดในการเปิดระบบ: " + e);
             btn.disabled = false;
-            btn.innerText = "ลองใหม่อีกครั้ง";
+            btn.innerText = "ลองอีกครั้ง";
         }
     }
 
-    async function cameraLoop() {
-        webcam.update();
-        window.requestAnimationFrame(cameraLoop);
-    }
+    // ลูปนี้รับผิดชอบเรื่องการวาดภาพสดจากกล้องเพียงอย่างเดียว ทำให้ภาพลื่นไหล 60FPS ไม่กระตุก
+    function renderLoop(timestamp) {
+        webcam.update(); // อัปเดตเฟรมภาพสด
 
-    function startAutomation() {
-        // 1. ตั้งตัวนับถอยหลังแสดงผลบนหน้าจอให้ผู้ใช้รับรู้ (อัปเดตทุก 100ms)
-        countdownInterval = setInterval(() => {
-            timeRemaining -= 0.1;
-            if (timeRemaining <= 0) {
-                timeRemaining = 3.0; // รีเซ็ตตัวเลข
+        // คำนวณเวลาที่ผ่านไป
+        const elapsed = timestamp - lastPredictTime;
+        
+        // อัปเดตแถบความคืบหน้าถอยหลัง (3 วินาที = 3000 มิลลิวินาที)
+        const progress = Math.min((elapsed / 3000) * 100, 100);
+        document.getElementById("progress-line").style.width = progress + "%";
+
+        // เมื่อครบกำหนด 3 วินาที และไม่มีกระบวนการทำนายค้างอยู่
+        if (elapsed >= 3000) {
+            if (!isPredicting) {
+                isPredicting = true;
+                lastPredictTime = timestamp; // รีเซ็ตเวลาตั้งต้นใหม่ทันที
+                
+                // ผลักดันกระบวนการ Predict ให้ทำงานเบื้องหลังแบบ Asynchronous ไม่ให้ขัดขวางการเรนเดอร์ภาพ
+                runBackgroundPrediction();
             }
-            document.getElementById("timer-display").innerText = `วิเคราะห์ในอีก: ${timeRemaining.toFixed(1)}s`;
-        }, 100);
+        }
 
-        // 2. สั่งทำนายผล (Predict) จริงๆ ทุกๆ 3 วินาที
-        predictInterval = setInterval(async () => {
-            triggerFlashEffect();
-            await predict();
-        }, 3000);
+        window.requestAnimationFrame(renderLoop);
     }
 
-    async function predict() {
-        const prediction = await model.predict(webcam.canvas);
-        for (let i = 0; i < maxPredictions; i++) {
-            const item = resultsPanel.childNodes[i];
-            const percentage = (prediction[i].probability * 100).toFixed(0);
+    // กระบวนการวิเคราะห์เบื้องหลัง (ไม่รบกวนความลื่นไหลของภาพหน้าจอ)
+    async function runBackgroundPrediction() {
+        try {
+            // ทำนายผลจากเฟรมภาพ ณ เสี้ยววินาทีนั้น
+            const prediction = await model.predict(webcam.canvas);
             
-            item.querySelector('.result-val').innerText = percentage + "%";
-            item.querySelector('.progress-bar-fill').style.width = percentage + "%";
+            // ปรับปรุงการแสดงผลผลลัพธ์บน UI
+            const rows = document.getElementById("result-list").childNodes;
+            for (let i = 0; i < maxPredictions; i++) {
+                const percent = (prediction[i].probability * 100).toFixed(0);
+                rows[i].querySelector('.output-val').innerText = percent + "%";
+            }
+        } catch (err) {
+            console.error("Prediction error:", err);
+        } finally {
+            isPredicting = false; // เปิดทางให้รอบถัดไปสามารถทำนายผลต่อได้
         }
     }
 
-    function createResultElements() {
-        resultsPanel.innerHTML = "";
+    function initUI() {
+        const list = document.getElementById("result-list");
+        list.innerHTML = "";
         for (let i = 0; i < maxPredictions; i++) {
-            const item = document.createElement("div");
-            item.className = "result-item";
-            item.innerHTML = `
-                <div class="result-info">
-                    <span class="result-name">${model.getClassLabels()[i]}</span>
-                    <span class="result-val">0%</span>
-                </div>
-                <div class="progress-bar-bg">
-                    <div class="progress-bar-fill"></div>
-                </div>
+            const row = document.createElement("div");
+            row.className = "output-row";
+            row.innerHTML = `
+                <span>${model.getClassLabels()[i]}</span>
+                <span class="output-val">0%</span>
             `;
-            resultsPanel.appendChild(item);
+            list.appendChild(row);
         }
-    }
-
-    function triggerFlashEffect() {
-        const cameraBox = document.getElementById("camera-box");
-        cameraBox.classList.add("flash");
-        setTimeout(() => {
-            cameraBox.classList.remove("flash");
-        }, 300);
     }
 </script>
 
